@@ -1,0 +1,60 @@
+#' @title Occluded Surface (OS)
+#' @name occluded_surface
+#'
+#' @description {The 'Occluded Surface (OS)' algorithm is a widely used approach for analyzing atomic packing in biomolecules. Here, we introduce 'FIBOS', an 'R' and 'Python' package that extends the 'OS' methodology with enhancements. The homonymous function 'occluded_surface' calculates 'OS' per atom.}
+#'
+#' @param pdb 4-digit PDB id (will fetch it from the RCSB repository) or the path to a PDB local file.
+#' @param method Method to be used: 'OS' (classic) or 'FIBOS'(default).The classic 'OS' covers the surface radially with one of the axes as a reference when allocating the dots. In 'FIBOS', Fibonacci spirals were used to allocate the dots, which is known to produce lower axial anisotropy as well as more evenly spaced points on a sphere.
+#'
+#' @details
+#' 'Occluded Surface (OS)' (Pattabiraman et al. 1995) method distributes dots (representing patches of area) across the atom surfaces. Each dot has a normal that extends until it reaches either a van der Waals surface of a neighboring atom (the dot is considered occluded) or covers a distance greater than the diameter of a water molecule (the dot is considered non-occluded and disregarded). Thus, with the summed areas of dots and the lengths of normals, it is possible to compose robust metrics capable of inferring the average packing density of atoms, residues, proteins, as well as any other group of biomolecules.
+#'
+#' For more details, see (Fleming et al, 2000) and (Soares, et al, 2024)
+#'
+#' @return A table containing:
+#' \describe{
+#' 	\item{\code{ATOM}}{the atomic contacts for each atom.}
+#' 	\item{\code{NUMBER OF POINTS}}{the number of dots (patches of area) on atomic surface.}
+#' 	\item{\code{AREA}}{the summed areas of dots.}
+#'  \item{\code{RAYLENGTH}}{the average lengths of normals normalized by 2.8 \eqn{\text{\AA}} (water diameter). So, raylen is a value between 0 and 1. A raylen close to 1 indicates worse packaging.}
+#'  \item{\code{DISTANCE}}{the average distances of contacts in (\eqn{\text{\AA}}).}
+#'}
+#' @seealso [osp()]
+#'
+#' @author Herson Soares, Joao Romanelli, Patrick Fleming, Carlos Silveira.
+#'
+#' @references
+#' Fleming PJ, Richards FM (2000). "Protein packing: Dependence on protein size, secondary structure and amino acid composition." <doi:10.1006/jmbi.2000.3750>
+#'
+#' Pattabiraman N, Ward KB, Fleming PJ (1995). "Occluded molecular surface: Analysis of protein packing." <doi:10.1002/jmr.300080603>
+#'
+#' Soares HHM, Romanelli JPR, Fleming PJ, da Silveira CH (2024). "bioRxiv, 2024.11.01.621530." <doi:10.1101/2024.11.01.621530>
+#'
+#' @examples
+#' \donttest{
+#' library(fibos)
+#' 
+#' #Configure the environment
+#' fibos_config()
+#'
+#' # Calculate FIBOS per atom and create .srf files in fibos_files folder
+#' pdb_fibos <- occluded_surface("1ptx", method = "FIBOS")
+#'
+#' # Calculate OSP metric per residue from .srf file in fibos_files folder
+#' pdb_osp <- osp(fs::path("fibos_files","prot_1ptx.srf"))
+#' }
+#' @export
+occluded_surface = function(pdb, method = "FIBOS"){
+  
+  if(reticulate::virtualenv_exists("fibos_venv")){
+    reticulate::use_virtualenv("fibos_venv")
+    if(!reticulate::py_module_available("fibos")){
+      warning("Module 'python' 'fibos' not available. Use 'fibos_config()' to install the module.")
+    }
+    else{
+      return(execute(pdb,method))
+    }
+  } else {
+    warning("The virtual environment fibos_venv was not found. Please run 'fibos_config()' to configure it.")
+  }
+}
