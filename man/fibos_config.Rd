@@ -6,9 +6,6 @@
 \usage{
 fibos_config()
 }
-\value{
-Invisible NULL. Called for its side effects.
-}
 \description{
 This function creates a 'Python' virtual environment and installs the
 'Python' module 'fibos' required for the full functionality of this package.
@@ -24,4 +21,9 @@ Administrator/sudo privileges might be required on some systems.
 # Set up the 'Python' environment and install the required module
 fibos_config()
 }
+}
+\seealso{
+\code{\link[=occluded_surface]{occluded_surface()}}
+
+\code{\link[=osp]{osp()}}
 }
